@@ -12,8 +12,8 @@
 
 | Platform | Link | Status |
 | :--- | :--- | :--- |
-| **Vercel Cloud (24/7 Permanent)** | [**https://yatrasathi.vercel.app**](https://yatrasathi.vercel.app) | 🟢 Production |
-| **Instant Live Tunnel (Active Now)** | [**https://yatrasathi-demo.loca.lt**](https://yatrasathi-demo.loca.lt) *(Tunnel Password: `106.202.53.39`)* | 🟡 Live Demo |
+| **Vercel Cloud (24/7 Permanent)** | [**https://yatrasathi.vercel.app**](https://yatra-sathi-miw3.vercel.app/) | 🟢 Production |
+| **Instant Live Tunnel (Active Now)** | [**https://yatrasathi-demo.loca.lt**](https://yatra-sathi-miw3.vercel.app/) | 🟡 Live Demo |
 | **GitHub Repository** | [**https://github.com/Teerthagrawal2007/YatraSathi**](https://github.com/Teerthagrawal2007/YatraSathi) | 🟢 Open Source |
 
 ---
