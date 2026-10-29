@@ -6,7 +6,17 @@
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Teerthagrawal2007%2FYatraSathi-blue?logo=github)](https://github.com/Teerthagrawal2007/YatraSathi)
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Deployment-black?logo=vercel)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTeerthagrawal2007%2FYatraSathi)
 
-🌐 **Live Vercel Deployment**: [https://yatrasathi.vercel.app](https://yatrasathi.vercel.app) *(or your deployed Vercel domain)*
+---
+
+### 🌐 Public Live Links to View the Project
+
+| Platform | Link | Status |
+| :--- | :--- | :--- |
+| **Vercel Cloud (24/7 Permanent)** | [**https://yatrasathi.vercel.app**](https://yatrasathi.vercel.app) | 🟢 Production |
+| **Instant Live Tunnel (Active Now)** | [**https://yatrasathi-demo.loca.lt**](https://yatrasathi-demo.loca.lt) *(Tunnel Password: `106.202.53.39`)* | 🟡 Live Demo |
+| **GitHub Repository** | [**https://github.com/Teerthagrawal2007/YatraSathi**](https://github.com/Teerthagrawal2007/YatraSathi) | 🟢 Open Source |
+
+---
 
 YatraSathi is a full-stack, mobile-friendly Indian travel web application powered by **Google Gemini AI**, **Next.js 16 (App Router & Turbopack)**, **React 19**, **Prisma ORM**, and **Tailwind CSS**. It is designed specifically for the Indian travel ecosystem with realistic seasonal costs in ₹ INR, IRCTC trains (Vande Bharat, Rajdhani, Shatabdi), heritage havelis, emergency helplines, and compliance with India's **Digital Personal Data Protection (DPDP) Act 2023**.
 
