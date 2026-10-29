@@ -133,11 +133,14 @@ export function generateDeterministicMockPlan(input: PlannerInput): PlannerOutpu
 /**
  * Generate itinerary via Google Gemini API or fallback
  */
-export async function generateItinerary(input: PlannerInput): Promise<{
+export async function generateItinerary(
+  input: PlannerInput,
+  customApiKey?: string | null
+): Promise<{
   plan: PlannerOutput;
   source: "gemini" | "deterministic_mock";
 }> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (customApiKey && customApiKey.trim() !== "") ? customApiKey.trim() : process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === "" || apiKey === "your_gemini_api_key_here") {
     return {

@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function GET() {
-  const apiKey = process.env.GEMINI_API_KEY;
+export async function GET(req: NextRequest) {
+  const headerKey = req.headers.get("x-gemini-key");
+  const apiKey = (headerKey && headerKey.trim() !== "") ? headerKey.trim() : process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === "" || apiKey === "your_gemini_api_key_here") {
     return NextResponse.json({
       connected: false,
       configured: false,
-      message: "GEMINI_API_KEY is not configured in environment variables (.env or Vercel).",
+      message: "GEMINI_API_KEY is not configured in environment variables or client settings.",
       model: null,
       latencyMs: null,
     });
@@ -49,4 +50,3 @@ export async function GET() {
     message: "Gemini API key is set, but the Google endpoint returned an error or high demand.",
   });
 }
-

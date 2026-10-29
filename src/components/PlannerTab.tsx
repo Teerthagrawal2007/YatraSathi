@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useI18n, formatINR } from "@/i18n";
+import { getAiHeaders } from "@/i18n/aiClient";
 import { PlannerOutput } from "@/server/schemas/planner";
 import {
   Sparkles,
@@ -53,7 +54,9 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
   const checkAiHealth = async () => {
     setIsCheckingAi(true);
     try {
-      const res = await fetch("/api/ai/status");
+      const res = await fetch("/api/ai/status", {
+        headers: getAiHeaders(),
+      });
       const json = await res.json();
       setAiStatus(json);
     } catch {
@@ -94,7 +97,7 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
     try {
       const res = await fetch("/api/planner", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAiHeaders() },
         body: JSON.stringify({
           destination: destination.trim(),
           days: Number(days),

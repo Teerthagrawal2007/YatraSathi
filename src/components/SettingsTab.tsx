@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useI18n } from "@/i18n";
 import { useTheme } from "@/components/ThemeProvider";
+import { getAiHeaders, getStoredGeminiKey, setStoredGeminiKey } from "@/i18n/aiClient";
 import {
   Settings,
   Languages,
@@ -16,6 +17,7 @@ import {
   Info,
   Code2,
   Sparkles,
+  Key,
 } from "lucide-react";
 
 interface SettingsTabProps {
@@ -32,11 +34,26 @@ export function SettingsTab({ onDataReset }: SettingsTabProps) {
 
   const [isCheckingAi, setIsCheckingAi] = useState(false);
   const [aiCheckResult, setAiCheckResult] = useState<any | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [keySavedStatus, setKeySavedStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    setApiKeyInput(getStoredGeminiKey());
+  }, []);
+
+  const handleSaveApiKey = () => {
+    setStoredGeminiKey(apiKeyInput);
+    setKeySavedStatus("Key saved! Re-testing AI connection...");
+    setTimeout(() => setKeySavedStatus(null), 3000);
+    checkGeminiStatus();
+  };
 
   const checkGeminiStatus = async () => {
     setIsCheckingAi(true);
     try {
-      const res = await fetch("/api/ai/status");
+      const res = await fetch("/api/ai/status", {
+        headers: getAiHeaders(),
+      });
       const json = await res.json();
       setAiCheckResult(json);
     } catch (e: any) {
@@ -267,6 +284,38 @@ export function SettingsTab({ onDataReset }: SettingsTabProps) {
             <span>Click &quot;Test Connection&quot; to ping Gemini API live.</span>
           </div>
         )}
+
+        <div className="p-4 rounded-xl bg-stone-50 dark:bg-zinc-800/70 border border-stone-200 dark:border-stone-700/80 space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+              <Key className="w-3.5 h-3.5 text-orange-600" />
+              <span>Gemini API Key (Local Browser & Live Sync)</span>
+            </label>
+            {keySavedStatus && (
+              <span className="text-[11px] font-semibold text-teal-600 dark:text-teal-400">
+                {keySavedStatus}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="password"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder="Enter Gemini API key (AIzaSy...)"
+              className="flex-1 px-3 py-2 rounded-xl text-xs bg-white dark:bg-zinc-900 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-mono focus:outline-hidden focus:ring-2 focus:ring-orange-500/20"
+            />
+            <button
+              onClick={handleSaveApiKey}
+              className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold cursor-pointer transition-colors shrink-0 shadow-xs"
+            >
+              Save & Test
+            </button>
+          </div>
+          <p className="text-[11px] text-stone-500">
+            Stored locally in your browser so you get 100% live Gemini AI itineraries and vouchers even on public Vercel links without needing backend env setup.
+          </p>
+        </div>
 
         <div className="p-3 rounded-xl bg-stone-50 dark:bg-zinc-800/60 text-[11px] text-stone-500 space-y-1">
           <span className="font-semibold block text-stone-700 dark:text-stone-300">💡 Vercel / Cloud Deployment Tip:</span>

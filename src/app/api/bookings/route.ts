@@ -14,13 +14,17 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category") || "ALL";
     const query = searchParams.get("q")?.trim();
     const useAi = searchParams.get("ai");
+    const customApiKey = req.headers.get("x-gemini-key");
 
     // If search query is provided and AI search is requested (or default when searching)
     if (query && useAi !== "false") {
-      const { items, source } = await searchBookingsWithGemini({
-        query,
-        category: category as any,
-      });
+      const { items, source } = await searchBookingsWithGemini(
+        {
+          query,
+          category: category as any,
+        },
+        customApiKey
+      );
 
       return NextResponse.json({
         success: true,
@@ -77,6 +81,8 @@ export async function POST(req: NextRequest) {
 
     const data = parseResult.data;
 
+    const customApiKey = req.headers.get("x-gemini-key");
+
     // 1. Generate digital e-Ticket / Boarding Voucher using Gemini AI
     const voucher = await generateBookingVoucher(
       {
@@ -85,7 +91,8 @@ export async function POST(req: NextRequest) {
         provider: data.provider,
         price: data.price,
       },
-      data.passenger || { name: user.name || "Traveler" }
+      data.passenger || { name: user.name || "Traveler" },
+      customApiKey
     );
 
     // Merge custom details with the AI generated voucher

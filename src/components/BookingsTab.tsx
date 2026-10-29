@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useI18n, formatINR } from "@/i18n";
+import { getAiHeaders } from "@/i18n/aiClient";
 import {
   ShoppingBag,
   Train,
@@ -108,7 +109,9 @@ export function BookingsTab({ trips, activeTripId, onBookingConfirmed }: Booking
         url += `&q=${encodeURIComponent(q)}&ai=${runWithAi ? "true" : "false"}`;
       }
 
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: getAiHeaders(),
+      });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setItems(json.data);
@@ -143,7 +146,7 @@ export function BookingsTab({ trips, activeTripId, onBookingConfirmed }: Booking
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAiHeaders() },
         body: JSON.stringify({
           tripId: targetTripId || undefined,
           category: selectedItem.category,

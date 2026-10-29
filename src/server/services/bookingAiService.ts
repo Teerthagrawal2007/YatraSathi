@@ -47,9 +47,10 @@ const CANDIDATE_MODELS = ["gemini-3.5-flash", "gemini-flash-lite-latest", "gemin
  * AI-powered Live Booking Search across Trains, Flights, Stays & Activities in India
  */
 export async function searchBookingsWithGemini(
-  params: BookingSearchRequest
+  params: BookingSearchRequest,
+  customApiKey?: string | null
 ): Promise<{ items: AiGeneratedBookingOption[]; source: "gemini" | "catalog_fallback" }> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (customApiKey && customApiKey.trim() !== "") ? customApiKey.trim() : process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === "" || !params.query.trim()) {
     return {
@@ -169,9 +170,10 @@ export async function generateBookingVoucher(
     gender?: string;
     seatPreference?: string;
     phone?: string;
-  }
+  },
+  customApiKey?: string | null
 ): Promise<BookingVoucherDetails> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (customApiKey && customApiKey.trim() !== "") ? customApiKey.trim() : process.env.GEMINI_API_KEY;
   const isTrain = booking.category === "TRAVEL" && (booking.provider.includes("Rail") || booking.title.toLowerCase().includes("express") || booking.title.toLowerCase().includes("train"));
   const pnr = `PNR-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
   const bookingRef = `YS-${Math.floor(100000 + Math.random() * 900000)}`;

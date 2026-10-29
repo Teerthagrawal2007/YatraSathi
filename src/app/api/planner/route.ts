@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { plan, source } = await generateItinerary(parseResult.data);
+    const customApiKey = req.headers.get("x-gemini-key");
+    const { plan, source } = await generateItinerary(parseResult.data, customApiKey);
 
     return NextResponse.json({
       success: true,
