@@ -1,0 +1,108 @@
+// Prisma schema for YatraSathi MVP
+// Portable across SQLite (local dev) and PostgreSQL (production)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  phone          String?         @unique
+  email          String?         @unique
+  name           String          @default("Yatri")
+  avatar         String?
+  optInLocation  Boolean         @default(false)
+  preferredLang  String          @default("en") // "en" | "hi"
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  trips          Trip[]
+  expenses       Expense[]
+  bookings       Booking[]
+  locationPings  LocationPing[]
+  safetyContacts SafetyContact[]
+}
+
+model Trip {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  destination   String
+  state         String?
+  startDate     DateTime
+  endDate       DateTime
+  totalBudget   Float          @default(25000)
+  currency      String         @default("INR")
+  coverImage    String?
+  status        String         @default("PLANNING") // "PLANNING", "ACTIVE", "COMPLETED"
+  itineraryJson String?        // Serialized itinerary plan
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  expenses      Expense[]
+  bookings      Booking[]
+  locationPings LocationPing[]
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  tripId      String?
+  trip        Trip?    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String   // "TRAVEL", "STAY", "EXPERIENCE"
+  title       String
+  provider    String
+  price       Float
+  isEstimated Boolean  @default(true) // Always labelled Estimated for mock data
+  bookingDate DateTime
+  status      String   @default("CONFIRMED_MOCK")
+  detailsJson String?  // Additional booking details (seat, room type, etc.)
+  createdAt   DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  amount      Float
+  category    String   // "FOOD", "STAY", "TRAVEL", "SHOPPING", "ACTIVITIES", "OTHER"
+  paidBy      String   @default("You")
+  splitType   String   @default("EQUAL") // "EQUAL", "EXACT", "PERCENTAGE"
+  splitDetails String? // JSON string describing companion breakdown
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model LocationPing {
+  id         String   @id @default(cuid())
+  tripId     String?
+  trip       Trip?    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  locality   String?
+  recordedAt DateTime @default(now())
+}
+
+model SafetyContact {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String
+  relationship String   @default("Emergency Contact")
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
