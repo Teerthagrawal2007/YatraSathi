@@ -39,8 +39,29 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plan, setPlan] = useState<PlannerOutput | null>(null);
+  const [planSource, setPlanSource] = useState<"gemini" | "deterministic_mock" | null>(null);
+  const [aiStatus, setAiStatus] = useState<any | null>(null);
+  const [isCheckingAi, setIsCheckingAi] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Check Gemini status on mount
+  React.useEffect(() => {
+    checkAiHealth();
+  }, []);
+
+  const checkAiHealth = async () => {
+    setIsCheckingAi(true);
+    try {
+      const res = await fetch("/api/ai/status");
+      const json = await res.json();
+      setAiStatus(json);
+    } catch {
+      setAiStatus({ connected: false });
+    } finally {
+      setIsCheckingAi(false);
+    }
+  };
 
   const popularDestinations = ["Jaipur", "Munnar", "Varanasi", "Manali", "Goa", "Udaipur"];
   const interestOptions = [
@@ -90,6 +111,7 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
       }
 
       setPlan(json.data);
+      setPlanSource(json.source || "gemini");
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred while planning.");
     } finally {
@@ -143,9 +165,35 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
     <div className="space-y-8 max-w-5xl mx-auto py-6 px-4 sm:px-6">
       {/* Title Header */}
       <div className="text-center sm:text-left">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 text-xs font-semibold mb-2">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Intelligent Itinerary Generator</span>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Intelligent Itinerary Generator</span>
+          </div>
+
+          {/* Gemini AI Status Indicator */}
+          <div className="inline-flex items-center gap-2 text-xs">
+            <button
+              type="button"
+              onClick={checkAiHealth}
+              disabled={isCheckingAi}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-zinc-800 hover:bg-stone-100 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
+              title="Click to re-check Gemini API connection"
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  aiStatus?.connected ? "bg-teal-500 animate-pulse" : "bg-amber-500"
+                }`}
+              />
+              <span className="font-medium">
+                {isCheckingAi
+                  ? "Pinging Gemini..."
+                  : aiStatus?.connected
+                  ? `Gemini AI: Connected (${aiStatus.latencyMs}ms)`
+                  : "Gemini AI: Fallback Mode"}
+              </span>
+            </button>
+          </div>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
           {t.planner.title}
@@ -338,9 +386,21 @@ export function PlannerTab({ onTripCreated }: PlannerTabProps) {
           <div className="p-6 rounded-2xl bg-linear-to-br from-orange-50 via-amber-50 to-stone-50 dark:from-zinc-900 dark:via-zinc-850 dark:to-zinc-900 border border-orange-200/80 dark:border-stone-800 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="px-2.5 py-1 rounded-md bg-orange-600 text-white text-[11px] font-bold uppercase tracking-wider">
-                  {plan.destination} • {plan.durationDays} Days
-                </span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2.5 py-1 rounded-md bg-orange-600 text-white text-[11px] font-bold uppercase tracking-wider">
+                    {plan.destination} • {plan.durationDays} Days
+                  </span>
+                  {planSource === "gemini" ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-[11px] font-bold">
+                      <Sparkles className="w-3 h-3 text-teal-600" />
+                      Live Gemini AI
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-stone-200 dark:bg-zinc-800 text-stone-700 dark:text-stone-300 text-[11px] font-medium">
+                      Offline Indian Travel Brain
+                    </span>
+                  )}
+                </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 mt-2">
                   {plan.destination} Itinerary
                 </h2>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useI18n } from "@/i18n";
 import { useTheme } from "@/components/ThemeProvider";
 import {
@@ -15,6 +15,7 @@ import {
   Loader2,
   Info,
   Code2,
+  Sparkles,
 } from "lucide-react";
 
 interface SettingsTabProps {
@@ -28,6 +29,26 @@ export function SettingsTab({ onDataReset }: SettingsTabProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const [isCheckingAi, setIsCheckingAi] = useState(false);
+  const [aiCheckResult, setAiCheckResult] = useState<any | null>(null);
+
+  const checkGeminiStatus = async () => {
+    setIsCheckingAi(true);
+    try {
+      const res = await fetch("/api/ai/status");
+      const json = await res.json();
+      setAiCheckResult(json);
+    } catch (e: any) {
+      setAiCheckResult({ connected: false, message: e.message || "Network error" });
+    } finally {
+      setIsCheckingAi(false);
+    }
+  };
+
+  useEffect(() => {
+    checkGeminiStatus();
+  }, []);
 
   const handleDeleteData = async () => {
     setIsDeleting(true);
@@ -172,6 +193,84 @@ export function SettingsTab({ onDataReset }: SettingsTabProps) {
             <Trash2 className="w-4 h-4" />
             <span>{t.settings.deleteDataBtn}</span>
           </button>
+        </div>
+      </div>
+
+      {/* Gemini AI Status & Diagnostics */}
+      <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-stone-200 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/70 text-orange-600 flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100">
+                Google Gemini AI Integration Status
+              </h3>
+              <span className="text-xs text-stone-500">Live API health check & diagnostics</span>
+            </div>
+          </div>
+
+          <button
+            onClick={checkGeminiStatus}
+            disabled={isCheckingAi}
+            className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-zinc-800 text-xs font-semibold text-stone-700 dark:text-stone-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            {isCheckingAi ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Testing...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                <span>Test Connection</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {aiCheckResult ? (
+          <div
+            className={`p-4 rounded-xl border text-xs space-y-2 ${
+              aiCheckResult.connected
+                ? "bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800 text-teal-900 dark:text-teal-200"
+                : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200"
+            }`}
+          >
+            <div className="flex items-center gap-2 font-bold">
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  aiCheckResult.connected ? "bg-teal-500 animate-pulse" : "bg-red-500"
+                }`}
+              />
+              <span>
+                {aiCheckResult.connected
+                  ? `Gemini AI is Connected and Active (${aiCheckResult.latencyMs}ms)`
+                  : "Gemini API Connection Failed"}
+              </span>
+            </div>
+
+            <p className="leading-relaxed text-[11px]">
+              {aiCheckResult.message}
+            </p>
+
+            {aiCheckResult.model && (
+              <div className="pt-2 border-t border-teal-200/60 dark:border-teal-800/60 grid grid-cols-2 gap-2 text-[11px]">
+                <div>• Active Model: <span className="font-mono font-bold">{aiCheckResult.model}</span></div>
+                <div>• Key Configured: <span className="font-mono">{aiCheckResult.keyMasked}</span></div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-zinc-800/50 border border-stone-200/70 text-xs text-stone-600 dark:text-stone-400 flex items-center justify-between">
+            <span>Click &quot;Test Connection&quot; to ping Gemini API live.</span>
+          </div>
+        )}
+
+        <div className="p-3 rounded-xl bg-stone-50 dark:bg-zinc-800/60 text-[11px] text-stone-500 space-y-1">
+          <span className="font-semibold block text-stone-700 dark:text-stone-300">💡 Vercel / Cloud Deployment Tip:</span>
+          <span>When deploying to Vercel, make sure you have added <code className="font-mono font-semibold">GEMINI_API_KEY</code> under <strong>Vercel Project Settings ➔ Environment Variables</strong>.</span>
         </div>
       </div>
 
